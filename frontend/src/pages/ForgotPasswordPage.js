@@ -9,7 +9,7 @@ const ForgotPasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/users/forgot-password', { email });
+      const res = await axios.post('https://mern-expense-tracker-backend-n4id.onrender.com/api/users/forgot-password', { email });
       toast.success('Reset link generated!');
       setResetLink(res.data.resetLink);
     } catch (err) {

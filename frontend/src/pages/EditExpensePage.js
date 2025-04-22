@@ -22,7 +22,7 @@ const EditExpensePage = () => {
     const fetchExpense = async () => {
       const token = localStorage.getItem('token');
       try {
-        const res = await axios.get(`http://localhost:5000/api/expenses/${id}`, {
+        const res = await axios.get(`https://mern-expense-tracker-backend-n4id.onrender.com/api/expenses/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -58,7 +58,7 @@ const EditExpensePage = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/expenses/${id}`,
+        `https://mern-expense-tracker-backend-n4id.onrender.com/api/expenses/${id}`,
         form,
         {
           headers: {

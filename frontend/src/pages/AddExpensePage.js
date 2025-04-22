@@ -38,7 +38,8 @@ const AddExpensePage = () => {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/expenses/add',
+       ' https://mern-expense-tracker-backend-n4id.onrender.com'
+,
         { ...form },
         {
           headers: {
