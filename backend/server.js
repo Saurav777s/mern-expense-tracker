@@ -12,7 +12,10 @@ import expenseRoutes from './routes/expenseRoutes.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://chimerical-peony-7266a1.netlify.app',
+  credentials: true
+}));
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
