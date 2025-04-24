@@ -15,10 +15,17 @@ const Navbar = () => {
 
   useEffect(() => {
     if (token) {
-      const decoded = jwtDecode(token);
-      setUser({ name: decoded.name, email: decoded.email });
+      try {
+        const decoded = jwtDecode(token);
+        setUser({ name: decoded.name, email: decoded.email });
+      } catch (error) {
+        console.error("Invalid token", error);
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     }
   }, [token]);
+  
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -50,6 +57,8 @@ const Navbar = () => {
       toast.error(err.response?.data?.message || 'Failed to delete account');
     }
   };
+  
+
   
   return (
     <nav style={{

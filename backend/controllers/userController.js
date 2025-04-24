@@ -53,9 +53,16 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
 
     // If valid, generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+    
 
     res.status(200).json({
       _id: user._id,
@@ -112,6 +119,16 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     res.status(200).json({ message: 'Password updated successfully!' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.user._id);
+    await Expense.deleteMany({ user: req.user._id }); // delete all their expenses
+    res.status(200).json({ message: 'Account and related expenses deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
