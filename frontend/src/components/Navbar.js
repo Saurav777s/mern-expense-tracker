@@ -24,7 +24,7 @@ const Navbar = () => {
         navigate('/login');
       }
     }
-  }, [token]);
+  }, [token,navigate]);
   
 
   const handleLogout = () => {
