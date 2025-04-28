@@ -32,7 +32,7 @@ const RegisterPage = () => {
     }
   
     try {
-      await axios.post('https://mern-expense-tracker-backend-n4id.onrender.com/api/users/register', form);
+      await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, form);
       toast.success('🎉 Registered successfully! Please login.');
       navigate('/login');
     } catch (err) {

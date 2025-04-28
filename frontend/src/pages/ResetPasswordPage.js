@@ -14,7 +14,7 @@ const ResetPasswordPage = () => {
 
     try {
       // Simulate reset flow (you can wire this to backend if needed)
-      await axios.post('https://mern-expense-tracker-backend-n4id.onrender.com/api/users/reset', { email });
+      await axios.post(`${process.env.REACT_APP_API_URL}/users/reset`, { email });
       toast.success('📧 If this email exists, a reset link has been sent!');
       setEmail('');
     } catch (err) {

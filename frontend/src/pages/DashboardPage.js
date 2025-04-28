@@ -20,7 +20,7 @@ const DashboardPage = () => {
   const fetchExpenses = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.get('https://mern-expense-tracker-backend-n4id.onrender.com/api/expenses', {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/expenses`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -36,7 +36,7 @@ const DashboardPage = () => {
     if (!window.confirm('Are you sure you want to delete this expense?')) return;
 
     try {
-      await axios.delete(`https://mern-expense-tracker-backend-n4id.onrender.com/api/expenses/${id}`
+      await axios.delete(`${process.env.REACT_APP_API_URL}/expenses/${id}`
         , {
         headers: {
           Authorization: `Bearer ${token}`,
