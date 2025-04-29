@@ -1,6 +1,5 @@
-// src/components/Navbar.js
 import React, { useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../context/ThemeContext';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
@@ -9,7 +8,9 @@ import { toast } from 'react-toastify';
 const Navbar = () => {
   const { darkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem('token');
+
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -26,13 +27,11 @@ const Navbar = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+    if (!window.confirm('Are you sure you want to delete your account?')) return;
 
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/users/delete`,
-        
-        {
-        headers: { Authorization: `Bearer ${token}` }
+      await axios.delete(`${process.env.REACT_APP_API_URL}/users/delete`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       localStorage.removeItem('token');
       toast.success('Account deleted successfully');
@@ -42,97 +41,129 @@ const Navbar = () => {
     }
   };
 
-  const buttonStyle = {
-    padding: '8px 14px',
+  const isActive = (path) => location.pathname === path;
+
+  const navButtonStyle = (active = false) => ({
     margin: '5px',
+    padding: active ? '10px 18px' : '8px 15px',
     border: 'none',
     borderRadius: '6px',
-    cursor: 'pointer',
-    backgroundColor: darkMode ? '#444' : '#007bff',
+    backgroundColor: active ? '#1976d2' : darkMode ? '#444' : '#2196F3',
     color: '#fff',
+    cursor: 'pointer',
+    fontWeight: active ? 'bold' : 'normal',
+    transform: active ? 'scale(1.05)' : 'scale(1)',
+    transition: 'all 0.2s ease-in-out',
+  });
+
+  const dropdownStyle = {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    backgroundColor: darkMode ? '#2c2c2c' : '#fff',
+    color: darkMode ? '#fff' : '#000',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    padding: '10px',
+    zIndex: 1000,
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    width: '200px',
   };
 
   return (
-    <nav style={{
-      backgroundColor: darkMode ? '#1a1a1a' : '#f9f9f9',
-      color: darkMode ? '#fff' : '#000',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '10px 20px',
-      flexWrap: 'wrap',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-    }}>
-      <div>
-        <h2 style={{ margin: 0, cursor: 'pointer' }} onClick={() => navigate('/')}>💸 Expense Tracker</h2>
-      </div>
+    <nav
+      style={{
+        backgroundColor: darkMode ? '#222' : '#f5f5f5',
+        color: darkMode ? '#fff' : '#000',
+        padding: '10px 20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
+      <h2>💸 Expense Tracker</h2>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {token ? (
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+        {token && (
           <>
-            <button style={buttonStyle} onClick={() => navigate('/')}>Dashboard</button>
-            <button style={buttonStyle} onClick={() => navigate('/add-expense')}>Add Expense</button>
-            <button style={buttonStyle} onClick={() => navigate('/reports')}>Reports</button>
-            <button style={buttonStyle} onClick={() => navigate('/history')}>History</button>
+            <button style={navButtonStyle(isActive('/'))} onClick={() => navigate('/')}>
+              Dashboard
+            </button>
+            <button style={navButtonStyle(isActive('/add-expense'))} onClick={() => navigate('/add-expense')}>
+              Add Expense
+            </button>
+            <button style={navButtonStyle(isActive('/reports'))} onClick={() => navigate('/reports')}>
+              Reports
+            </button>
+            <button style={navButtonStyle(isActive('/history'))} onClick={() => navigate('/history')}>
+              History
+            </button>
 
-            {/* Profile Dropdown */}
             <div style={{ position: 'relative' }}>
               <button
-                style={{ ...buttonStyle, backgroundColor: darkMode ? '#555' : '#28a745' }}
+                style={{
+                  ...navButtonStyle(showDropdown),
+                  backgroundColor: darkMode ? '#555' : '#555',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                }}
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 👤 {user?.name || 'Profile'}
               </button>
 
               {showDropdown && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  backgroundColor: darkMode ? '#333' : '#fff',
-                  border: '1px solid #ccc',
-                  borderRadius: '5px',
-                  marginTop: '5px',
-                  padding: '10px',
-                  zIndex: 1000,
-                  minWidth: '200px',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                }}>
+                <div style={dropdownStyle}>
                   <p><strong>Name:</strong> {user?.name}</p>
                   <p><strong>Email:</strong> {user?.email}</p>
                   <button
-                    style={{ ...buttonStyle, width: '100%', backgroundColor: '#ffc107', color: '#000' }}
+                    style={{
+                      ...navButtonStyle(),
+                      backgroundColor: '#777',
+                      width: '100%',
+                    }}
                     onClick={() => navigate('/reset-password')}
                   >
-                    Reset Password
+                    🔐 Reset Password
                   </button>
                   <button
-                    style={{ ...buttonStyle, width: '100%', backgroundColor: 'red' }}
+                    style={{
+                      ...navButtonStyle(),
+                      backgroundColor: 'crimson',
+                      width: '100%',
+                    }}
                     onClick={handleDeleteAccount}
                   >
-                    Delete Account
+                    🗑️ Delete Account
                   </button>
                 </div>
               )}
             </div>
 
-            <button style={{ ...buttonStyle, backgroundColor: '#dc3545' }} onClick={handleLogout}>
+            <button style={navButtonStyle()} onClick={handleLogout}>
               Logout
             </button>
           </>
-        ) : (
+        )}
+
+        {!token && (
           <>
-            <button style={buttonStyle} onClick={() => navigate('/login')}>Login</button>
-            <button style={buttonStyle} onClick={() => navigate('/register')}>Register</button>
+            <button style={navButtonStyle(isActive('/login'))} onClick={() => navigate('/login')}>
+              Login
+            </button>
+            <button style={navButtonStyle(isActive('/register'))} onClick={() => navigate('/register')}>
+              Register
+            </button>
           </>
         )}
 
         <button
           onClick={toggleTheme}
           style={{
-            ...buttonStyle,
+            ...navButtonStyle(),
             backgroundColor: darkMode ? '#666' : '#333',
-            color: '#fff',
           }}
         >
           {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}

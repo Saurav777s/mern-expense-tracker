@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import Expense from '../models/Expense.js';
 
 
 export const registerUser = async (req, res) => {

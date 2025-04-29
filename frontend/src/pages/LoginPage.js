@@ -11,19 +11,14 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const res =  await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, form);
-
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, form);
       localStorage.setItem('token', res.data.token);
       toast.success(`Welcome ${res.data.name}!`);
       navigate('/');
@@ -35,33 +30,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: darkMode ? '#121212' : '#f9f9f9',
-        color: darkMode ? '#fff' : '#000',
-        padding: '1rem',
-      }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          backgroundColor: darkMode ? '#1f1f1f' : '#fff',
-          padding: '2rem',
-          borderRadius: '10px',
-          boxShadow: darkMode
-            ? '0 0 15px rgba(255,255,255,0.1)'
-            : '0 0 10px rgba(0,0,0,0.1)',
-          maxWidth: '400px',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-        }}
-      >
+    <div className="auth-container" style={containerStyle(darkMode)}>
+      <form onSubmit={handleSubmit} style={formStyle(darkMode)}>
         <h2 style={{ textAlign: 'center' }}>Login</h2>
 
         <input
@@ -84,45 +54,40 @@ const LoginPage = () => {
           style={inputStyle(darkMode)}
         />
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            backgroundColor: loading ? '#999' : '#4CAF50',
-            color: '#fff',
-            padding: '10px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
-        >
+        <button type="submit" disabled={loading} style={buttonStyle(loading)}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
 
-        {/* Links */}
-        <div
-          style={{
-            textAlign: 'center',
-            fontSize: '14px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.3rem',
-          }}
-        >
-          <Link to="/reset-password" style={{ color: darkMode ? '#90caf9' : '#1976d2' }}>
-            Forgot Password?
-          </Link>
-          <span>
-            New here?{' '}
-            <Link to="/register" style={{ color: darkMode ? '#90caf9' : '#1976d2' }}>
-              Register
-            </Link>
-          </span>
+        <div style={linkGroupStyle(darkMode)}>
+          <Link to="/reset-password">Forgot Password?</Link>
+          <Link to="/register">New here? Register</Link>
         </div>
       </form>
     </div>
   );
 };
+
+const containerStyle = (darkMode) => ({
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: darkMode ? '#121212' : '#f9f9f9',
+  padding: '1rem',
+});
+
+const formStyle = (darkMode) => ({
+  backgroundColor: darkMode ? '#1f1f1f' : '#fff',
+  padding: '2rem',
+  borderRadius: '10px',
+  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+  width: '100%',
+  maxWidth: '400px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+  color: darkMode ? '#fff' : '#000',
+});
 
 const inputStyle = (darkMode) => ({
   padding: '10px',
@@ -130,6 +95,24 @@ const inputStyle = (darkMode) => ({
   border: '1px solid #ccc',
   backgroundColor: darkMode ? '#333' : '#fff',
   color: darkMode ? '#fff' : '#000',
+});
+
+const buttonStyle = (loading) => ({
+  backgroundColor: loading ? '#999' : '#4CAF50',
+  color: '#fff',
+  padding: '10px',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: loading ? 'not-allowed' : 'pointer',
+});
+
+const linkGroupStyle = (darkMode) => ({
+  textAlign: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  fontSize: '14px',
+  gap: '0.5rem',
+  color: darkMode ? '#90caf9' : '#1976d2',
 });
 
 export default LoginPage;

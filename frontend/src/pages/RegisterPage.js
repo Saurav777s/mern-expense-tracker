@@ -1,72 +1,67 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import axios from 'axios';
+import { ThemeContext } from '../context/ThemeContext';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const { darkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+    return regex.test(password);
+  };
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const password = form.password;
-  
-    // Password strength validation
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-  
-    if (!passwordRegex.test(password)) {
-      toast.error(
-        <>
-          <strong>Password is too weak!</strong><br />
-          • Minimum 8 characters<br />
-          • At least 1 uppercase<br />
-          • At least 1 special character
-        </>
-      );
-      return; //  Stop form submission
+    if (!validateEmail(form.email)) {
+      toast.error('Invalid email format');
+      return;
     }
-  
+    if (!validatePassword(form.password)) {
+      toast.error('Password must be at least 8 characters, 1 uppercase, and 1 special character');
+      return;
+    }
+
+    setLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, form);
-      toast.success('🎉 Registered successfully! Please login.');
-      navigate('/login');
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, form);
+      localStorage.setItem('token', res.data.token);
+      toast.success('Registration successful!');
+      navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      background: 'transparent'
-    }}>
-      <form onSubmit={handleSubmit} style={{
-        backgroundColor: '#fff',
-        padding: '2rem',
-        borderRadius: '10px',
-        boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '400px'
-      }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Create Account</h2>
+    <div className="auth-container" style={containerStyle(darkMode)}>
+      <form onSubmit={handleSubmit} style={formStyle(darkMode)}>
+        <h2 style={{ textAlign: 'center' }}>Register</h2>
 
         <input
           type="text"
           name="name"
-          placeholder="Name"
+          placeholder="Username"
           value={form.name}
           onChange={handleChange}
           required
-          style={inputStyle}
+          style={inputStyle(darkMode)}
         />
 
         <input
@@ -76,43 +71,96 @@ const RegisterPage = () => {
           value={form.email}
           onChange={handleChange}
           required
-          style={inputStyle}
+          style={inputStyle(darkMode)}
         />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-          style={inputStyle}
-        />
+        <div style={{ position: 'relative' }}>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            required
+            style={{ ...inputStyle(darkMode), width: '100%' }}
+          />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              cursor: 'pointer',
+              color: darkMode ? '#ccc' : '#555'
+            }}
+          >
+            {showPassword ? '🙈' : '👁️'}
+          </span>
+        </div>
 
-        <button type="submit" style={{
-          width: '100%',
-          padding: '10px',
-          backgroundColor: '#4CAF50',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          fontSize: '16px'
-        }}>
-          Register
+        <button type="submit" disabled={loading} style={buttonStyle(loading)}>
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
+
+        <div style={linkGroupStyle(darkMode)}>
+          <span>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: darkMode ? '#90caf9' : '#1976d2' }}>
+              Login
+            </Link>
+          </span>
+        </div>
       </form>
     </div>
   );
 };
 
-const inputStyle = {
+// === STYLES ===
+
+const containerStyle = (darkMode) => ({
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: darkMode ? '#121212' : '#f9f9f9',
+  padding: '1rem',
+});
+
+const formStyle = (darkMode) => ({
+  backgroundColor: darkMode ? '#1f1f1f' : '#fff',
+  padding: '2rem',
+  borderRadius: '10px',
+  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
   width: '100%',
+  maxWidth: '400px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+  color: darkMode ? '#fff' : '#000',
+});
+
+const inputStyle = (darkMode) => ({
   padding: '10px',
-  marginBottom: '1rem',
-  border: '1px solid #ccc',
   borderRadius: '5px',
-  fontSize: '15px'
-};
+  border: '1px solid #ccc',
+  backgroundColor: darkMode ? '#333' : '#fff',
+  color: darkMode ? '#fff' : '#000',
+});
+
+const buttonStyle = (loading) => ({
+  backgroundColor: loading ? '#999' : '#4CAF50',
+  color: '#fff',
+  padding: '10px',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: loading ? 'not-allowed' : 'pointer',
+});
+
+const linkGroupStyle = (darkMode) => ({
+  textAlign: 'center',
+  fontSize: '14px',
+  color: darkMode ? '#90caf9' : '#1976d2',
+});
 
 export default RegisterPage;

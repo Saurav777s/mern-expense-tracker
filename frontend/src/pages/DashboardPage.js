@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { toast } from 'react-toastify';
-import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [expenses, setExpenses] = useState([]);
   const { darkMode } = useContext(ThemeContext);
-
 
   useEffect(() => {
     fetchExpenses();
@@ -34,13 +31,9 @@ const DashboardPage = () => {
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
     if (!window.confirm('Are you sure you want to delete this expense?')) return;
-
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/expenses/${id}`
-        , {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await axios.delete(`${process.env.REACT_APP_API_URL}/expenses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Expense deleted!');
       setExpenses((prev) => prev.filter((exp) => exp._id !== id));
@@ -49,21 +42,16 @@ const DashboardPage = () => {
     }
   };
 
-  // Total Expense for Current Month
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
   const currentMonthExpenses = expenses.filter((exp) => {
     const date = new Date(exp.date);
-    return (
-      date.getMonth() === currentMonth &&
-      date.getFullYear() === currentYear
-    );
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
 
   const totalThisMonth = currentMonthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
-  // Pie Chart Data
   const categoryData = Object.entries(
     currentMonthExpenses.reduce((acc, exp) => {
       acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
@@ -75,24 +63,23 @@ const DashboardPage = () => {
 
   return (
     <div
-  style={{
-    padding: '2rem',
-    maxWidth: '1000px',
-    margin: 'auto',
-    backgroundColor: darkMode ? '#1f1f1f' : '#fff',
-    color: darkMode ? '#fff' : '#000',
-    minHeight: '100vh'
-  }}
->
+      style={{
+        padding: '1rem',
+        maxWidth: '1000px',
+        margin: 'auto',
+        backgroundColor: darkMode ? '#1f1f1f' : '#fff',
+        color: darkMode ? '#fff' : '#000',
+        minHeight: '100vh',
+      }}
+    >
+      <h2 style={{ fontSize: '1.5rem' }}>
+        📅 Dashboard – {new Date().toLocaleString('default', { month: 'long' })} {currentYear}
+      </h2>
 
-      <h2>📅 Dashboard – {new Date().toLocaleString('default', { month: 'long' })} {currentYear}</h2>
-
-      {/* Total Expense */}
       <h3 style={{ margin: '1rem 0' }}>
         💰 Total This Month: <span style={{ color: '#4CAF50' }}>₹{totalThisMonth}</span>
       </h3>
 
-      {/* Pie Chart */}
       <div style={{ width: '100%', height: 300 }}>
         {categoryData.length > 0 ? (
           <ResponsiveContainer>
@@ -120,69 +107,63 @@ const DashboardPage = () => {
         )}
       </div>
 
-      {/* Recent Transactions */}
       <div style={{ marginTop: '2rem' }}>
         <h4>🧾 Recent Transactions:</h4>
         {currentMonthExpenses.length === 0 ? (
           <p>No expenses added this month.</p>
         ) : (
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            {currentMonthExpenses
-              .slice(-5)
-              .reverse()
-              .map((exp) => (
-                <li
-                  key={exp._id}
-                  style={{
-                    backgroundColor: darkMode ? '#333' : '#f4f4f4',
-                    padding: '10px',
-                    marginBottom: '10px',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap'
-                  }}
-                >
-                  <div>
-                    <strong>{exp.title}</strong> – ₹{exp.amount} ({exp.category}) <br />
-                    <small>{new Date(exp.date).toLocaleDateString('en-GB')}
-                    </small>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => navigate(`/edit-expense/${exp._id}`)}
-                      style={{
-                        backgroundColor: '#2196F3',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '6px 10px',
-                        marginRight: '10px',
-                        borderRadius: '5px',
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(exp._id)}
-                      style={{
-                        backgroundColor: '#f44336',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '6px 10px',
-                        borderRadius: '5px',
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
+            {currentMonthExpenses.slice(-5).reverse().map((exp) => (
+              <li
+                key={exp._id}
+                style={{
+                  backgroundColor: darkMode ? '#333' : '#f4f4f4',
+                  padding: '10px',
+                  marginBottom: '10px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div>
+                  <strong>{exp.title}</strong> – ₹{exp.amount} ({exp.category})<br />
+                  <small>{new Date(exp.date).toLocaleDateString('en-GB')}</small>
+                </div>
+                <div style={{ marginTop: '10px' }}>
+                  <button
+                    onClick={() => navigate(`/edit-expense/${exp._id}`)}
+                    style={{
+                      backgroundColor: '#2196F3',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '6px 10px',
+                      marginRight: '10px',
+                      borderRadius: '5px',
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(exp._id)}
+                    style={{
+                      backgroundColor: '#f44336',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '6px 10px',
+                      borderRadius: '5px',
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
           </ul>
         )}
       </div>
 
-      {/* Add Expense Button */}
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>
         <button
           onClick={() => navigate('/add-expense')}
@@ -194,6 +175,8 @@ const DashboardPage = () => {
             fontSize: '16px',
             borderRadius: '6px',
             cursor: 'pointer',
+            width: '100%',
+            maxWidth: '250px',
           }}
         >
           ➕ Add New Expense

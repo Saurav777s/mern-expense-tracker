@@ -5,17 +5,15 @@ import { toast } from 'react-toastify';
 import { ThemeContext } from '../context/ThemeContext';
 
 const EditExpensePage = () => {
+  const { darkMode } = useContext(ThemeContext);
   const { id } = useParams();
   const navigate = useNavigate();
-  const { darkMode } = useContext(ThemeContext);
-
   const [form, setForm] = useState({
     title: '',
     amount: '',
     category: '',
-    date: '',
+    date: ''
   });
-
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -23,20 +21,17 @@ const EditExpensePage = () => {
       const token = localStorage.getItem('token');
       try {
         const res = await axios.get(`${process.env.REACT_APP_API_URL}/expenses/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const { title, amount, category, date } = res.data;
         setForm({
           title,
           amount,
           category,
-          date: date.slice(0, 10), // format to yyyy-mm-dd
+          date: date.slice(0, 10)
         });
-      } catch (error) {
-        toast.error('Failed to load expense');
+      } catch (err) {
+        toast.error('Failed to fetch expense');
       }
     };
 
@@ -44,30 +39,19 @@ const EditExpensePage = () => {
   }, [id]);
 
   const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const token = localStorage.getItem('token');
     setLoading(true);
+    const token = localStorage.getItem('token');
 
     try {
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}/expenses/${id}`,
-        form,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      toast.success('✅ Expense updated successfully!');
+      await axios.put(`${process.env.REACT_APP_API_URL}/expenses/${id}`, form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Expense updated!');
       navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
@@ -79,32 +63,50 @@ const EditExpensePage = () => {
   return (
     <div
       style={{
-        padding: '2rem',
-        maxWidth: '500px',
-        margin: 'auto',
-        backgroundColor: darkMode ? '#1f1f1f' : '#fff',
-        color: darkMode ? '#fff' : '#000',
         minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: darkMode ? '#121212' : '#f9f9f9',
+        padding: '1rem',
       }}
     >
-      <h2>Edit Expense</h2>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          backgroundColor: darkMode ? '#1f1f1f' : '#fff',
+          color: darkMode ? '#fff' : '#000',
+          padding: '2rem',
+          borderRadius: '10px',
+          boxShadow: darkMode
+            ? '0 0 15px rgba(255,255,255,0.1)'
+            : '0 0 10px rgba(0,0,0,0.1)',
+          maxWidth: '400px',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <h2 style={{ textAlign: 'center' }}>✏️ Edit Expense</h2>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
         <input
           type="text"
           name="title"
-          placeholder="Expense Title"
           value={form.title}
           onChange={handleChange}
+          placeholder="Title"
+          required
           style={inputStyle(darkMode)}
         />
 
         <input
           type="number"
           name="amount"
-          placeholder="Amount (₹)"
           value={form.amount}
           onChange={handleChange}
+          placeholder="Amount"
+          required
           style={inputStyle(darkMode)}
         />
 
@@ -112,14 +114,15 @@ const EditExpensePage = () => {
           name="category"
           value={form.category}
           onChange={handleChange}
+          required
           style={inputStyle(darkMode)}
         >
-          <option value="">Select Category</option>
+          <option value="">Select category</option>
           <option value="Food">Food</option>
           <option value="Transport">Transport</option>
-          <option value="Utilities">Utilities</option>
           <option value="Shopping">Shopping</option>
           <option value="Health">Health</option>
+          <option value="Utilities">Utilities</option>
           <option value="Other">Other</option>
         </select>
 
@@ -128,6 +131,7 @@ const EditExpensePage = () => {
           name="date"
           value={form.date}
           onChange={handleChange}
+          required
           style={inputStyle(darkMode)}
         />
 
@@ -135,12 +139,13 @@ const EditExpensePage = () => {
           type="submit"
           disabled={loading}
           style={{
-            backgroundColor: loading ? '#999' : '#2196F3',
+            backgroundColor: loading ? '#999' : '#4CAF50',
             color: '#fff',
             padding: '10px',
             border: 'none',
             borderRadius: '5px',
             cursor: loading ? 'not-allowed' : 'pointer',
+            fontSize: '16px'
           }}
         >
           {loading ? 'Updating...' : 'Update Expense'}
@@ -156,6 +161,7 @@ const inputStyle = (darkMode) => ({
   border: '1px solid #ccc',
   backgroundColor: darkMode ? '#333' : '#fff',
   color: darkMode ? '#fff' : '#000',
+  fontSize: '14px',
 });
 
 export default EditExpensePage;

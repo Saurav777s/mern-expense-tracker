@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -6,8 +6,10 @@ import {
 } from 'recharts';
 import { toast } from 'react-toastify';
 import { CSVLink } from 'react-csv';
+import { ThemeContext } from '../context/ThemeContext';
 
 const ReportsPage = () => {
+  const { darkMode } = useContext(ThemeContext);
   const [expenses, setExpenses] = useState([]);
   const [viewMode, setViewMode] = useState('monthly');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -60,21 +62,33 @@ const ReportsPage = () => {
   }, {});
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '1000px', margin: 'auto' }}>
-      <h2>📊 Expense Reports</h2>
+    <div style={{
+      padding: '1rem',
+      maxWidth: '1000px',
+      margin: 'auto',
+      backgroundColor: darkMode ? '#1f1f1f' : '#fff',
+      color: darkMode ? '#fff' : '#000',
+      minHeight: '100vh'
+    }}>
+      <h2 style={{ textAlign: 'center' }}>📊 Expense Reports</h2>
 
-      <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{
+        marginBottom: '1rem',
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '1rem'
+      }}>
         <div>
           <button
             onClick={() => setViewMode('monthly')}
             style={{
               padding: '8px 15px',
               border: '1px solid #ccc',
-              backgroundColor: viewMode === 'monthly' ? '#4CAF50' : '#f0f0f0',
-              color: viewMode === 'monthly' ? '#fff' : '#000',
+              backgroundColor: viewMode === 'monthly' ? '#4CAF50' : (darkMode ? '#444' : '#f0f0f0'),
+              color: viewMode === 'monthly' ? '#fff' : (darkMode ? '#fff' : '#000'),
               borderRadius: '5px',
               cursor: 'pointer',
-              marginRight: '5px',
             }}
           >
             Monthly
@@ -84,55 +98,67 @@ const ReportsPage = () => {
             style={{
               padding: '8px 15px',
               border: '1px solid #ccc',
-              backgroundColor: viewMode === 'yearly' ? '#4CAF50' : '#f0f0f0',
-              color: viewMode === 'yearly' ? '#fff' : '#000',
+              backgroundColor: viewMode === 'yearly' ? '#4CAF50' : (darkMode ? '#444' : '#f0f0f0'),
+              color: viewMode === 'yearly' ? '#fff' : (darkMode ? '#fff' : '#000'),
               borderRadius: '5px',
               cursor: 'pointer',
+              marginLeft: '8px',
             }}
           >
             Yearly
           </button>
         </div>
 
-        <div>
-          <label>
-            Year:
-            <input
-              type="number"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              style={{ marginLeft: '10px', padding: '5px' }}
-            />
-          </label>
-        </div>
+        <label>
+          Year:
+          <input
+            type="number"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            style={{
+              marginLeft: '10px',
+              padding: '5px',
+              width: '80px',
+              backgroundColor: darkMode ? '#333' : '#fff',
+              color: darkMode ? '#fff' : '#000',
+              border: '1px solid #ccc',
+              borderRadius: '4px'
+            }}
+          />
+        </label>
 
         {viewMode === 'monthly' && (
-          <div>
-            <label>
-              Month:
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                style={{ marginLeft: '10px', padding: '5px' }}
-              >
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <label>
+            Month:
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              style={{
+                marginLeft: '10px',
+                padding: '5px',
+                backgroundColor: darkMode ? '#333' : '#fff',
+                color: darkMode ? '#fff' : '#000',
+                border: '1px solid #ccc',
+                borderRadius: '4px'
+              }}
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                </option>
+              ))}
+            </select>
+          </label>
         )}
       </div>
 
       {/* Bar Chart */}
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="label" />
-          <YAxis />
-          <Tooltip />
+          <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#888' : '#ccc'} />
+          <XAxis dataKey="label" stroke={darkMode ? '#fff' : '#000'} />
+          <YAxis stroke={darkMode ? '#fff' : '#000'} />
+          <Tooltip contentStyle={{ backgroundColor: darkMode ? '#444' : '#fff' }} />
           <Bar dataKey="amount" fill="#8884d8" />
         </BarChart>
       </ResponsiveContainer>
@@ -149,8 +175,8 @@ const ReportsPage = () => {
         </ul>
       </div>
 
-      {/* Download Button */}
-      <div style={{ marginTop: '2rem' }}>
+      {/* Download CSV Button */}
+      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
         <CSVLink
           data={filteredExpenses}
           filename="expense-report.csv"

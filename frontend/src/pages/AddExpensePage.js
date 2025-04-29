@@ -1,56 +1,34 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useContext, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const AddExpensePage = () => {
-  const navigate = useNavigate();
   const { darkMode } = useContext(ThemeContext);
-
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: '',
     amount: '',
     category: '',
     date: '',
   });
-
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { title, amount, category, date } = form;
-    if (!title || !amount || !category || !date) {
-      toast.error('Please fill in all fields.');
-      return;
-    }
-
-    const token = localStorage.getItem('token');
     setLoading(true);
-
+    const token = localStorage.getItem('token');
     try {
-      await axios.post(
-       `${process.env.REACT_APP_API_URL}/expenses/add`
-,
-        { ...form },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      toast.success('✅ Expense added successfully!');
-      setForm({ title: '', amount: '', category: '', date: '' });
-      navigate('/'); // or keep them on page
+      await axios.post(`${process.env.REACT_APP_API_URL}/expenses`, form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Expense added successfully!');
+      navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Something went wrong');
     } finally {
@@ -61,33 +39,48 @@ const AddExpensePage = () => {
   return (
     <div
       style={{
-        padding: '2rem',
-        maxWidth: '500px',
-        margin: 'auto',
+        backgroundColor: darkMode ? '#121212' : '#f5f5f5',
         color: darkMode ? '#fff' : '#000',
-        backgroundColor: darkMode ? '#1f1f1f' : '#fff',
         minHeight: '100vh',
-        boxSizing: 'border-box',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
       }}
     >
-      <h2 style={{ marginBottom: '1.5rem' }}>➕ Add New Expense</h2>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          backgroundColor: darkMode ? '#1f1f1f' : '#fff',
+          padding: '2rem',
+          borderRadius: '10px',
+          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+          maxWidth: '500px',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <h2 style={{ textAlign: 'center' }}>➕ Add Expense</h2>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <input
           type="text"
           name="title"
-          placeholder="Expense Title"
+          placeholder="Title"
           value={form.title}
           onChange={handleChange}
+          required
           style={inputStyle(darkMode)}
         />
 
         <input
           type="number"
           name="amount"
-          placeholder="Amount (₹)"
+          placeholder="Amount"
           value={form.amount}
           onChange={handleChange}
+          required
           style={inputStyle(darkMode)}
         />
 
@@ -95,14 +88,14 @@ const AddExpensePage = () => {
           name="category"
           value={form.category}
           onChange={handleChange}
+          required
           style={inputStyle(darkMode)}
         >
           <option value="">Select Category</option>
           <option value="Food">Food</option>
-          <option value="Transport">Transport</option>
-          <option value="Utilities">Utilities</option>
+          <option value="Travel">Travel</option>
           <option value="Shopping">Shopping</option>
-          <option value="Health">Health</option>
+          <option value="Utilities">Utilities</option>
           <option value="Other">Other</option>
         </select>
 
@@ -111,6 +104,7 @@ const AddExpensePage = () => {
           name="date"
           value={form.date}
           onChange={handleChange}
+          required
           style={inputStyle(darkMode)}
         />
 
@@ -120,9 +114,9 @@ const AddExpensePage = () => {
           style={{
             backgroundColor: loading ? '#999' : '#4CAF50',
             color: '#fff',
-            padding: '10px',
+            padding: '12px',
             border: 'none',
-            borderRadius: '5px',
+            borderRadius: '6px',
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
@@ -139,6 +133,7 @@ const inputStyle = (darkMode) => ({
   border: '1px solid #ccc',
   backgroundColor: darkMode ? '#333' : '#fff',
   color: darkMode ? '#fff' : '#000',
+  width: '100%',
 });
 
 export default AddExpensePage;
