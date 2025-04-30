@@ -13,8 +13,9 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'https://chimerical-peony-7266a1.netlify.app',
+  //origin: 'https://chimerical-peony-7266a1.netlify.app',
   //origin: 'http://localhost:3000',
+  origin: 'https://jade-belekoy-ecbb86.netlify.app',
   credentials: true
 }));
 app.use(express.json());
